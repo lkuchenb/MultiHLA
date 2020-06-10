@@ -20,6 +20,8 @@
 
 rule trim:
     # Executes Trim Galore! for adapter and low-quality base trimming
+    conda:
+        "../envs/trim.yaml"
     input:
         r1 = 'fastq/{prefix}_R1{suffix}.fastq.gz',
         r2 = 'fastq/{prefix}_R2{suffix}.fastq.gz',
@@ -37,8 +39,6 @@ rule trim:
         r2 = 'trim/{prefix}_R2{suffix}.trimmed.fastq.gz',
         r1fastqc = 'trim/{prefix}_R1{suffix}.trimmed.fastqc.html',
         r2fastqc = 'trim/{prefix}_R2{suffix}.trimmed.fastqc.html',
-    conda:
-        "../envs/trim.yaml"
     log:
         'trim/{prefix}{suffix}.trim.log',
     threads:
