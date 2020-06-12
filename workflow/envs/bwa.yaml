@@ -18,6 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-include: 'rules/trim.smk'
-
-include: 'rules/xhla.smk'
+channels:
+    - bioconda
+dependencies:
+    - bwa=0.7.17
+    - htslib=1.10.2
+    - samtools=1.10
+    - pigz=2.4
