@@ -83,7 +83,7 @@ rule xhla_bwamem:
         """
         # Read mapping using BWA
         bwa mem -t {threads} \
-                ./ref/hg38.main.fa \
+                ./ref/hg38.noalt.fa \
                 <(unpigz -c {params[r1_fastqs]}) \
                 <(unpigz -c {params[r2_fastqs]}) \
                 2>{log.bwa:q} | samtools sort -T /share/scratch/kuchenb.tmp/samtools.$HOSTNAME.$$ -o {output.bam} &>{log.sort:q}
