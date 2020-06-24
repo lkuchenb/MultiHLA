@@ -18,18 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Benchmark workflow related rules including conversion of tool specific output
-# to HLABench standard output
-include: 'rules/hlabench.smk'
+# Concatenates plain text files, omitting the first row in all but the first
+# input file
 
-# Adapter trimming
-include: 'rules/trim.smk'
+header = False
+with open(snakemake.output[0], 'w') as outfile:
+    for inpath in snakemake.input:
+        with open(inpath, 'r') as infile:
+            if header:
+                next(infile)
+            else:
+                header = True
+            for row in infile:
+                print(row, file = outfile, end = '')
 
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'

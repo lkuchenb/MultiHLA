@@ -19,87 +19,15 @@
 # SOFTWARE.
 
 import os
-import re
-import shlex
-from csv import DictReader
-
-def read_sample_sheet(dataset):
-    try:
-        with open(os.path.join('datasets', dataset + '.tsv'), 'r') as sample_sheet:
-            reader = DictReader(sample_sheet, delimiter = '\t')
-            return [ record for record in reader  ]
-    except FileNotFoundError as e:
-        raise RuntimeError(f'Could not find a sample sheet for the dataset \'{dataset}\'\n{e}.')
-
-def bwamem_input(wildcards):
-    dataset = wildcards.dataset
-    sample  = wildcards.sample
-
-    records = [ record for record in read_sample_sheet(dataset) if record['SampleName'] == sample ]
-
-    fastqs = [ record['FileNameR1'] for record in records ] + [ record['FileNameR2'] for record in records ]
-    fastqs = { 'fastq_' + str(idx) : os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for idx, fastq in zip(range(len(fastqs)), fastqs) }
-
-    return fastqs
-
-def bwamem_params(input):
-    # We extract all input keys that start with fastq_
-    fastqs = [ input[key] for key in input.keys() if key.startswith('fastq_') ]
-
-    # The list of FASTQ files is expected to contain the R1 fastq files first
-    # and then the R2 fastq files in the corresponding order. Hence we split
-    # the list in two even halfs. We return two strings, one for all R1 files
-    # and one for all R2 files, each providing a space separated list of shell
-    # escaped paths.
-    if not len(fastqs) or len(fastqs) % 2 != 0:
-        raise RuntimeError('None or uneven number of FASTQ files supplied')
-    r1_fastqs = ' '.join([ shlex.quote(path) for path in fastqs[:len(fastqs)//2] ])
-    r2_fastqs = ' '.join([ shlex.quote(path) for path in fastqs[len(fastqs)//2:] ])
-    return r1_fastqs, r2_fastqs
-
-rule xhla_bwamem:
-    # Read mapping with BWQ mem default params as instructed by xhla authors
-    conda:
-        "../envs/bwa.yaml"
-    input:
-        unpack(bwamem_input)
-    output:
-        bam = 'typing/xhla/{dataset}_{sample}.bam',
-        bai = 'typing/xhla/{dataset}_{sample}.bam.bai',
-    log:
-        bwa = 'typing/xhla/{dataset}_{sample}.bwa.log',
-        sort = 'typing/xhla/{dataset}_{sample}.sort.log',
-        index = 'typing/xhla/{dataset}_{sample}.index.log',
-    params:
-        r1_fastqs = lambda wildcards, input : bwamem_params(input)[0],
-        r2_fastqs = lambda wildcards, input : bwamem_params(input)[1],
-
-        # Parameters for cluster execution
-        cluster_mem = '16G',
-        cluster_rt = '4:00:00',
-    threads:
-        6
-    shell:
-        """
-        # Read mapping using BWA
-        bwa mem -t {threads} \
-                ./ref/hg38.noalt.fa \
-                <(unpigz -c {params[r1_fastqs]}) \
-                <(unpigz -c {params[r2_fastqs]}) \
-                2>{log.bwa:q} | samtools sort -T /share/scratch/kuchenb.tmp/samtools.$HOSTNAME.$$ -o {output.bam} &>{log.sort:q}
-
-        # BAM Indexing
-        samtools index -@ {threads} {output.bam:q} &>{log.index:q}
-        """
 
 rule xhla_typing:
     container:
         'docker://humanlongevity/hla'
     input:
-        bam = '{base}.bam',
-        bai = '{base}.bam.bai',
+        bam = 'map/{base}.bam',
+        bai = 'map/{base}.bam.bai',
     output:
-        json = '{base}.xhla',
+        json = 'typing/xhla/{base}.xhla.json',
         tdir = temp(directory('{base}.xhla.workdir')),
         bindir = temp(directory('{base}.xhla.bindir')),
     log:
@@ -142,28 +70,4 @@ rule xhla_typing:
         fi
         rm -rfv hla-sample.$HOSTNAME.$$ &>>{log:q}
         exit $ecode
-        """
-
-def collector_dataset(wildcards, prefix, suffix):
-    samples = { record['SampleName'] for record in read_sample_sheet(wildcards.dataset) }
-    return [ f'{prefix}{wildcards.dataset}_{sample}{suffix}' for sample in samples ]
-
-rule xhla_collector_bam:
-    input:
-        lambda wildcards : collector_dataset(wildcards, 'typing/xhla/', '.bam')
-    output:
-        'typing/xhla/{dataset}.mapping'
-    shell:
-        """
-        touch {output:q}
-        """
-
-rule xhla_collector_xhla:
-    input:
-        lambda wildcards : collector_dataset(wildcards, 'typing/xhla/', '.xhla')
-    output:
-        'typing/xhla/{dataset}.tsv'
-    shell:
-        """
-        touch {output:q}
         """

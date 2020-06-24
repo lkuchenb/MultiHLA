@@ -30,6 +30,28 @@ publicly available software to derive HLA haplotypes from this type of data.
 	hg38.noalt.fa.sa
 	```
 
+ * HLA-VBSeq
+
+	The workflow implements read mapping the reads against hg19 without alt
+	contigs. The authors instructions merely state to "map against hg19"
+	without any further specifics, but mapping against hg19 with alt contigs
+	yielded very poor typing results with missing HLA class I genes, thus
+	the benchmark workflow uses hg19 without alt contigs.
+
+	HLA-VBSeq released two reference database versions:
+
+	* v1 database based on IMGT/HLA database, Release 3.15.0
+	* v2 database based on IMGT/HLA database Release 3.31.0 and Japanese HLA reference dataset
+
+	```
+	hg38.noalt.fa
+	hg38.noalt.fa.amb
+	hg38.noalt.fa.ann
+	hg38.noalt.fa.bwt
+	hg38.noalt.fa.pac
+	hg38.noalt.fa.sa
+	```
+
 ## Usage
 
  1. Install snakemake
@@ -86,7 +108,7 @@ publicly available software to derive HLA haplotypes from this type of data.
 	process all samples of a dataset, for example the dataset `benchmark_1`
 	described in `datasets/benchmark_1.tsv` use
 	```
-	snakemake --use-conda --use-singularity typing/xhla/benchmark_1.tsv
+	snakemake --use-conda --use-singularity typing/benchmark_1.all.hlabench
 	```
 	Memory and run time requirements for each job are noted in their params (`cluster_mem` and `cluster_rt`). For example, to interface with an SGE grid engine using DRMAA you may use
 	```

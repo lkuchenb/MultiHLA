@@ -18,18 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Benchmark workflow related rules including conversion of tool specific output
-# to HLABench standard output
-include: 'rules/hlabench.smk'
+import os
+from csv import DictReader
 
-# Adapter trimming
-include: 'rules/trim.smk'
+def read_sample_sheet(dataset):
+    """Reads the sample sheet corresponding to a dataset and returns it's
+    contents in form of a list of dictionaries."""
+    try:
+        with open(os.path.join('datasets', dataset + '.tsv'), 'r') as sample_sheet:
+            reader = DictReader(sample_sheet, delimiter = '\t')
+            return [ record for record in reader  ]
+    except FileNotFoundError as e:
+        raise RuntimeError(f'Could not find a sample sheet for the dataset \'{dataset}\'\n{e}.')
 
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'

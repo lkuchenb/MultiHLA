@@ -20,6 +20,8 @@
 
 channels:
     - bioconda
+    - conda-forge
+
 dependencies:
     - cutadapt=2.10
     - dnaio=0.4.2
