@@ -34,12 +34,22 @@
     \node [main, below=\vdist of xhlaMap3] (xhla) {xhla};
     \draw (xhlaMap3) -- (xhla);
 
-    \node [main,gray,right=\hdist of xhlaMap] (methodB) {Method B};
-    \node [main,gray,right=\hdist of methodB] (methodC) {Method C};
+    \node [main,right=\hdist of xhlaMap] (vbseqMap) {Read Mapping\\hg19 (no alt)};
+    \node [minor, below=-\pgflinewidth of vbseqMap] (vbseqMap1) {bwa mem};
+    \node [minor, below=-\pgflinewidth of vbseqMap1] (vbseqMap2) {samtools sort};
+    \node [minor, below=-\pgflinewidth of vbseqMap2] (vbseqMap3) {samtools index};
+
+    \node [main, below left=\vdist and 2mm of vbseqMap3, anchor=north] (vbseq1) {HLA-VBSeq v1};
+    \node [main, below right=\vdist and 2mm of vbseqMap3, anchor=north] (vbseq2) {HLA-VBSeq v2};
+
+    \draw (vbseqMap3.south) -- +(0,-.5\vdist) -| (vbseq1);
+    \draw (vbseqMap3.south) -- +(0,-.5\vdist) -| (vbseq2);
+
+    \node [main,gray,right=\hdist of vbseqMap] (methodC) {Method C};
 
     \node [main, anchor=south] (trim) at ($(xhlaMap.north west)!.5!(methodC.north east) + (0,\vdist)$) {Adapter Trimming};
 
-    \draw[gray] (trim.south) -- +(0,-.5\vdist) -| (methodB.north);
+    \draw[] (trim.south) -- +(0,-.5\vdist) -| (vbseqMap.north);
     \draw[gray] (trim.south) -- +(0,-.5\vdist) -| (methodC.north);
     \draw (trim.south) -- +(0,-.5\vdist) -| (xhlaMap.north);
 \end{tikzpicture}

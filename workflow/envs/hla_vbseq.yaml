@@ -18,18 +18,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Benchmark workflow related rules including conversion of tool specific output
-# to HLABench standard output
-include: 'rules/hlabench.smk'
+channels:
+    - bioconda
+    - conda-forge
 
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
+dependencies:
+    - gatk=3.8
+    - openjdk=8.0.192
+    - htslib=1.10.2
+    - picard=2.23.0
+    - samtools=1.10
+    - pigz=2.4
+    - bwa=0.7.17
+    - pandas=1.0.3
