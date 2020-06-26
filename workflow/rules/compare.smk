@@ -18,22 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Benchmark workflow related rules including conversion of tool specific output
-# to HLABench standard output
-include: 'rules/hlabench.smk'
-
-# Comparison to ground truth alleles
-include: 'rules/compare.smk'
-
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
-
+rule compare:
+    output:
+        raw       = 'compare/{dataset}.compare.raw.tsv',
+        annotated = 'compare/{dataset}.compare.annotated.tsv',
+    input:
+        typing = 'typing/{dataset}.all.hlabench',
+        gtruth = 'truth/{dataset}.tsv',
+    conda:
+        '../envs/compare.yaml'
+    params:
+        # Parameters for cluster execution
+        cluster_mem = '1G',
+        cluster_rt = '0:15:00',
+    script:
+        '../scripts/compare.py'
