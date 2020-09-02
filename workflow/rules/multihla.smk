@@ -29,11 +29,11 @@ def get_samples(dataset):
 ####################################################################################################
 
 rule xhla_conversion:
-    """Converts xHLA output files to the HLABench standard format"""
+    """Converts xHLA output files to the MultiHLA standard format"""
     input:
         'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.json',
     output:
-        'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.hlabench',
+        'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.multihla',
     params:
         opts = lambda wildcards : f'version=0 trim={wildcards.trim} ref={wildcards.ref}',
 
@@ -46,7 +46,7 @@ rule xhla_conversion:
         with open(input[0], 'r') as infile:
             alleles = json.load(infile)['hla']['alleles']
 
-        # Write hlabench output
+        # Write multihla output
         import collections
         with open(output[0], 'w') as outfile:
             print('Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2', file=outfile)
@@ -66,14 +66,14 @@ rule xhla_conversion:
 rule hla_xhla_dataset:
     input:
         lambda wildcards : [
-            f'typing/xhla/{wildcards.dataset}_{sample}_{trim}_{ref}.xhla.hlabench'
+            f'typing/xhla/{wildcards.dataset}_{sample}_{trim}_{ref}.xhla.multihla'
             for sample in get_samples(wildcards.dataset)
             for ref in [ 'hg38.noalt' ] # We only map against hg38 w/o alt contigs
             for trim in [ 'trim' ]      # We only work with adapter trimmed reads
             for ver in ['1', '2']       # We perfom the analysis with VBSeq version 1 and 2
             ]
     output:
-        'typing/xhla/{dataset}.xhla.ds.hlabench'
+        'typing/xhla/{dataset}.xhla.ds.multihla'
     params:
         # Parameters for cluster execution
         cluster_mem = '1G',
@@ -86,11 +86,11 @@ rule hla_xhla_dataset:
 ####################################################################################################
 
 rule hla_vbseq_conversion:
-    """Converts HLA VBSeq output files to the HLABench standard format"""
+    """Converts HLA VBSeq output files to the MultiHLA standard format"""
     input:
         'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.tsv',
     output:
-        'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.hlabench',
+        'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.multihla',
     params:
         opts = lambda wildcards : f'version={wildcards.version} trim={wildcards.trim} ref={wildcards.ref}',
 
@@ -106,14 +106,14 @@ rule hla_vbseq_conversion:
 rule hla_vbseq_dataset:
     input:
         lambda wildcards : [
-            f'typing/vbseq/{wildcards.dataset}_{sample}_{trim}_{ref}.v{ver}.vbseq.hlabench'
+            f'typing/vbseq/{wildcards.dataset}_{sample}_{trim}_{ref}.v{ver}.vbseq.multihla'
             for sample in get_samples(wildcards.dataset)
             for ref in [ 'hg19.noalt' ] # We only map against hg19 w/o alt contigs
             for trim in [ 'trim' ]      # We only work with adapter trimmed reads
             for ver in ['1', '2']       # We perfom the analysis with VBSeq version 1 and 2
             ]
     output:
-        'typing/vbseq/{dataset}.vbseq.ds.hlabench'
+        'typing/vbseq/{dataset}.vbseq.ds.multihla'
     params:
         # Parameters for cluster execution
         cluster_mem = '1G',
@@ -127,10 +127,10 @@ rule hla_vbseq_dataset:
 
 rule collect:
     input:
-        'typing/vbseq/{dataset}.vbseq.ds.hlabench',
-        'typing/xhla/{dataset}.xhla.ds.hlabench',
+        'typing/vbseq/{dataset}.vbseq.ds.multihla',
+        'typing/xhla/{dataset}.xhla.ds.multihla',
     output:
-        'typing/{dataset}.all.hlabench'
+        'typing/{dataset}.all.multihla'
     params:
         # Parameters for cluster execution
         cluster_mem = '1G',

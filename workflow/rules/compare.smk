@@ -23,7 +23,7 @@ rule compare:
         raw       = 'compare/{dataset}.compare.raw.tsv',
         annotated = 'compare/{dataset}.compare.annotated.tsv',
     input:
-        typing = 'typing/{dataset}.all.hlabench',
+        typing = 'typing/{dataset}.all.multihla',
         gtruth = 'truth/{dataset}.tsv',
     conda:
         '../envs/compare.yaml'

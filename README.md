@@ -1,7 +1,7 @@
-# HLA Typing Benchmark Workflow
+# HLA Typing Workflow
 
 <p align="center">
-<img src="img/hla_bench_diag.svg?raw=true" alt="Workflow Diagram"/>
+<img src="img/multihla_diag.svg?raw=true" alt="Workflow Diagram"/>
 </p>
 
 ## Scope of this workflow
@@ -36,7 +36,7 @@ publicly available software to derive HLA haplotypes from this type of data.
 	contigs. The authors instructions merely state to "map against hg19"
 	without any further specifics, but mapping against hg19 with alt contigs
 	yielded very poor typing results with missing HLA class I genes, thus
-	the benchmark workflow uses hg19 without alt contigs.
+	the workflow uses hg19 without alt contigs.
 
 	HLA-VBSeq released two reference database versions:
 
@@ -62,14 +62,14 @@ publicly available software to derive HLA haplotypes from this type of data.
 	conda activate snakemake
 	```
 
- 1. Clone the *HLABench* repository
+ 1. Clone the *MultiHLA* repository
 	```
-	git clone https://github.com/lkuchenb/HLABench.git hla_benchmark
-	cd hla_benchmark
+	git clone https://github.com/lkuchenb/MultiHLA.git hla_typing
+	cd hla_typing
 	```
 
  1. Put the input files in place<br/>
-    *HLABench* comes with a predefined folder structure:
+    *MultiHLA* comes with a predefined folder structure:
     * `dataset/`
 
 		A dataset is defined as a set of samples. Place a TSV file here for every dataset with the following three named columns:
@@ -105,10 +105,10 @@ publicly available software to derive HLA haplotypes from this type of data.
 	Invoke snakemake using `snakemake --use-conda --use-singularity`. This enables
 	snakemake to automatically install dependencies into conda environments that
 	are created on the fly and also enables the container based jobs to run. To
-	process all samples of a dataset, for example the dataset `benchmark_1`
-	described in `datasets/benchmark_1.tsv` use
+	process all samples of a dataset, for example the dataset `dataset_1`
+	described in `datasets/dataset_1.tsv` use
 	```
-	snakemake --use-conda --use-singularity typing/benchmark_1.all.hlabench
+	snakemake --use-conda --use-singularity typing/dataset_1.all.multihla
 	```
 	Memory and run time requirements for each job are noted in their params (`cluster_mem` and `cluster_rt`). For example, to interface with an SGE grid engine using DRMAA you may use
 	```

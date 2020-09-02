@@ -18,9 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Benchmark workflow related rules including conversion of tool specific output
-# to HLABench standard output
-include: 'rules/hlabench.smk'
+# Global rules including conversion of tool specific output to MultiHLA
+# standard output
+include: 'rules/multihla.smk'
 
 # Comparison to ground truth alleles
 include: 'rules/compare.smk'
