@@ -70,7 +70,6 @@ rule hla_xhla_dataset:
             for sample in get_samples(wildcards.dataset)
             for ref in [ 'hg38.noalt' ] # We only map against hg38 w/o alt contigs
             for trim in [ 'trim' ]      # We only work with adapter trimmed reads
-            for ver in ['1', '2']       # We perfom the analysis with VBSeq version 1 and 2
             ]
     output:
         'typing/xhla/{dataset}.xhla.ds.multihla'
