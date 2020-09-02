@@ -28,10 +28,10 @@ rule xhla_typing:
         bai = 'map/{base}.bam.bai',
     output:
         json = 'typing/xhla/{base}.xhla.json',
-        tdir = temp(directory('{base}.xhla.workdir')),
-        bindir = temp(directory('{base}.xhla.bindir')),
+        tdir = temp(directory('typing/xhla/{base}.xhla.workdir')),
+        bindir = temp(directory('typing/xhla/{base}.xhla.bindir')),
     log:
-        '{base}.xhla.log',
+        'typing/xhla/{base}.xhla.log',
     params:
         # Parameters for cluster execution
         # Some times xHLA just leaks infinite amounts of memory and will be
