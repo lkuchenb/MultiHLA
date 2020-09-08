@@ -81,7 +81,62 @@ rule hla_xhla_dataset:
         '../scripts/concat_tables.py'
 
 ####################################################################################################
-# HLA VBSEQ
+# HLA-LA
+####################################################################################################
+
+rule hla_la_conversion:
+    """Converts HLA VBSeq output files to the MultiHLA standard format"""
+    input:
+        'typing/hla_la/{dataset}_{sample}_{trim}_{ref}.hla_la.txt',
+    output:
+        'typing/hla_la/{dataset}_{sample}_{trim}_{ref}.hla_la.multihla',
+    params:
+        opts = lambda wildcards : f'version=1.0.1 trim={wildcards.trim} ref={wildcards.ref}',
+
+        # Parameters for cluster execution
+        cluster_mem = '1G',
+        cluster_rt = '0:15:00',
+    run:
+        import csv
+        from collections import defaultdict
+        ddict = defaultdict(lambda : set())
+        with open(input[0], 'r') as infile:
+            reader = csv.DictReader(infile, delimiter = '\t')
+            for rec in reader:
+                # extract first two fields and drop gene name
+                allele = ':'.join(rec['Allele'].split(':')[:2]).split('*')[1]
+                # record allele
+                ddict[rec['Locus']].add(allele)
+        with open(output[0], 'w') as outfile:
+            print('Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2', file = outfile)
+            for gene, alleles in ddict.items():
+                alleles = list(alleles)
+                if len(alleles)==2:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-LA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+                elif len(alleles)==1:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-LA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[0]}', file = outfile)
+                else:
+                    raise RuntimeError('hla_la_conversion expects either one or two alleles to be reported per gene')
+
+rule hla_la_dataset:
+    input:
+        lambda wildcards : [
+            f'typing/hla_la/{wildcards.dataset}_{sample}_{trim}_{ref}.hla_la.multihla'
+            for sample in get_samples(wildcards.dataset)
+            for ref in [ 'hg38.noalt' ] # We only map against hg19 w/o alt contigs
+            for trim in [ 'trim' ]      # We only work with adapter trimmed reads
+            ]
+    output:
+        'typing/hla_la/{dataset}.hla_la.ds.multihla'
+    params:
+        # Parameters for cluster execution
+        cluster_mem = '1G',
+        cluster_rt = '0:15:00',
+    script:
+        '../scripts/concat_tables.py'
+
+####################################################################################################
+# HLA-VBSEQ
 ####################################################################################################
 
 rule hla_vbseq_conversion:
@@ -128,6 +183,7 @@ rule collect:
     input:
         'typing/vbseq/{dataset}.vbseq.ds.multihla',
         'typing/xhla/{dataset}.xhla.ds.multihla',
+        'typing/hla_la/{dataset}.hla_la.ds.multihla',
     output:
         'typing/{dataset}.all.multihla'
     params:
