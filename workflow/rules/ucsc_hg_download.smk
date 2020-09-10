@@ -18,25 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Global rules including conversion of tool specific output to MultiHLA
-# standard output
-include: 'rules/multihla.smk'
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+HTTP = HTTPRemoteProvider()
 
-# UCSC human genome download and alt contig filter
-include: 'rules/ucsc_hg_download.smk'
-
-# Comparison to ground truth alleles
-include: 'rules/compare.smk'
-
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
-
+rule ucsc_hg_download:
+    conda:
+        '../envs/ucsc_hg_download.yaml'
+    input:
+        HTTP.remote('https://hgdownload.soe.ucsc.edu/goldenPath/hg{version}/bigZips/hg{version}.fa.gz', keep_local = False)
+    output:
+        'ref/hg{version,19|38}.noalt.fa'
+    script:
+        '../scripts/hg_filter_noalt.py'

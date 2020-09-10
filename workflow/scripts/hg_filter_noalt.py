@@ -18,25 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Global rules including conversion of tool specific output to MultiHLA
-# standard output
-include: 'rules/multihla.smk'
+# Removes alt contigs from UCSC human genome files
 
-# UCSC human genome download and alt contig filter
-include: 'rules/ucsc_hg_download.smk'
+from Bio import SeqIO
+import gzip
 
-# Comparison to ground truth alleles
-include: 'rules/compare.smk'
+whitelist = [ 'chr' + e for e in [ str(num) for num in range(1,23) ] + ['X','Y'] ]
 
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
-
+with open(snakemake.output[0], 'w') as outfile:
+    with gzip.open(snakemake.input[0], 'rt') as infile:
+        generator = ( record for record in SeqIO.parse(infile, "fasta") if record.id in whitelist )
+        SeqIO.write(generator, outfile, 'fasta')

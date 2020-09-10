@@ -18,18 +18,6 @@ publicly available software to derive HLA haplotypes from this type of data.
 	sorted and index using samtools and the HLA typing is performed using the
 	docker container provided by the authors.
 
-	The workflow requires the human genome reference `hg38` with no alt
-	contigs and with index files produced by `bwa index` to be provided in the
-	`ref/` folder under the following names:
-	```
-	hg38.noalt.fa
-	hg38.noalt.fa.amb
-	hg38.noalt.fa.ann
-	hg38.noalt.fa.bwt
-	hg38.noalt.fa.pac
-	hg38.noalt.fa.sa
-	```
-
  * HLA-VBSeq
 
 	The workflow implements read mapping the reads against hg19 without alt
@@ -42,15 +30,6 @@ publicly available software to derive HLA haplotypes from this type of data.
 
 	* v1 database based on IMGT/HLA database, Release 3.15.0
 	* v2 database based on IMGT/HLA database Release 3.31.0 and Japanese HLA reference dataset
-
-	```
-	hg38.noalt.fa
-	hg38.noalt.fa.amb
-	hg38.noalt.fa.ann
-	hg38.noalt.fa.bwt
-	hg38.noalt.fa.pac
-	hg38.noalt.fa.sa
-	```
 
 ## Usage
 
@@ -90,7 +69,7 @@ publicly available software to derive HLA haplotypes from this type of data.
 		Place the FASTQ files as listed in your dataset sheet here.
     * `ref/`
 
-		Place the required human genome references here as described for each supported method.
+		Place or link the required human genome references here as described for each supported method, otherwise they will be automatically downloaded.
     * `trim/`
 
 		This is an output folder. It will be filled with adapter trimmed versions of the provided FASTQ files.

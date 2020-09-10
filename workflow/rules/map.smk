@@ -22,6 +22,24 @@ import shlex
 import helpers
 import os
 
+rule bwa_index:
+    input:
+        'ref/{genome}'
+    output:
+        'ref/{genome}.0123',
+        'ref/{genome}.amb',
+        'ref/{genome}.ann',
+        'ref/{genome}.bwt.2bit.64',
+        'ref/{genome}.bwt.8bit.32',
+        'ref/{genome}.pac',
+    log:
+        'ref/{genome}.bwaindex.log'
+    params:
+        prefix='ref/{genome}',
+        algorithm='bwtsw'
+    wrapper:
+        '0.65.0/bio/bwa-mem2/index'
+
 def bwa_mem_input(wildcards):
     dataset = wildcards.dataset
     sample  = wildcards.sample
@@ -30,69 +48,69 @@ def bwa_mem_input(wildcards):
 
     records = [ record for record in helpers.read_sample_sheet(dataset) if record['SampleName'] == sample ]
 
-    fastqs = [ record['FileNameR1'] for record in records ] + [ record['FileNameR2'] for record in records ]
+    fastqs_r1 = [ record['FileNameR1'] for record in records ]
+    fastqs_r2 = [ record['FileNameR2'] for record in records if record['FileNameR2'] != '']
+
+    if len(fastqs_r1) != 1:
+        print(fastqs_r1)
+        raise RuntimeError('Exactly one R1 reads file has to be specified for a sample')
+    if len(fastqs_r2) not in [0,1] :
+        raise RuntimeError('One or no R2 reads file has to be specified for a sample')
+
+    reads = fastqs_r1 + fastqs_r2
 
     if trim:
-        inputs = { 'fastq_' + str(idx) : os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for idx, fastq in zip(range(len(fastqs)), fastqs) }
+        reads = [ os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for fastq in reads ]
     else:
-        inputs = { 'fastq_' + str(idx) : os.path.join('fastq', fastq) for idx, fastq in zip(range(len(fastqs)), fastqs) }
+        reads = [ os.path.join('fastq', fastq) for fastq in reads ]
 
-    # Add the dependecy to the specified reference
-    inputs['ref'] = os.path.join('ref', ref + '.fa')
+    return {
+            'reads' : reads,
+            'ref'   : os.path.join('ref', ref + '.fa'),
+            'pac'   : os.path.join('ref', ref + '.fa.pac'),
+            }
 
-    return inputs
-
-def bwamem_params(input):
-    # We extract all input keys that start with fastq_
-    fastqs = [ input[key] for key in input.keys() if key.startswith('fastq_') ]
-
-    # The list of FASTQ files is expected to contain the R1 fastq files first
-    # and then the R2 fastq files in the corresponding order. Hence we split
-    # the list in two even halfs. We return two strings, one for all R1 files
-    # and one for all R2 files, each providing a space separated list of shell
-    # escaped paths.
-    if not len(fastqs) or len(fastqs) % 2 != 0:
-        raise RuntimeError('None or uneven number of FASTQ files supplied')
-    r1_fastqs = ' '.join([ shlex.quote(path) for path in fastqs[:len(fastqs)//2] ])
-    r2_fastqs = ' '.join([ shlex.quote(path) for path in fastqs[len(fastqs)//2:] ])
-    return r1_fastqs, r2_fastqs
-
-rule bwa_mem:
-    # Read mapping with BWQ mem default params as instructed by xhla authors
+rule samtools_index:
     conda:
-        "../envs/bwa.yaml"
+        '../envs/samtools.yaml'
+    input:
+        'map/{sample}.bam'
+    output:
+        'map/{sample}.bam.bai'
+    params:
+        # Parameters for cluster execution
+        cluster_mem = '16G',
+        cluster_rt = '1:00:00',
+    threads:
+        1
+    shell:
+        """
+        samtools index {input:q} {output:q}
+        """
+
+rule bwa_mem_2:
     input:
         unpack(bwa_mem_input)
     output:
         bam = 'map/{dataset}_{sample}_{trim}_{ref}.bam',
-        bai = 'map/{dataset}_{sample}_{trim}_{ref}.bam.bai',
     log:
-        bwa = 'map/{dataset}_{sample}_{trim}_{ref}.bwa.log',
-        sort = 'map/{dataset}_{sample}_{trim}_{ref}.sort.log',
-        index = 'map/{dataset}_{sample}_{trim}_{ref}.index.log',
+        bwa = 'map/{dataset}_{sample}_{trim}_{ref}.log',
     wildcard_constraints:
         trim = 'trim|orig'
     params:
-        r1_fastqs = lambda wildcards, input : bwamem_params(input)[0],
-        r2_fastqs = lambda wildcards, input : bwamem_params(input)[1],
-
+        # Wrapper parameters
+        index=lambda wildcards, input : input.ref,
+        extra="",
+        sort="samtools",         # Can be 'none', 'samtools' or 'picard'.
+        sort_order="coordinate", # Can be 'coordinate' (default) or 'queryname'.
+        sort_extra="",           # Extra args for samtools/picard.
         # Parameters for cluster execution
         cluster_mem = '16G',
         cluster_rt = '8:00:00',
     threads:
         6
-    shell:
-        """
-        # Read mapping using BWA and BAM sorting using samtools
-        bwa mem -t {threads} \
-                {input.ref:q} \
-                <(unpigz -c {params[r1_fastqs]}) \
-                <(unpigz -c {params[r2_fastqs]}) \
-                2>{log.bwa:q} | samtools sort -T /share/scratch/kuchenb.tmp/samtools.$HOSTNAME.$$ -o {output.bam} &>{log.sort:q}
-
-        # BAM indexing using samtools
-        samtools index -@ {threads} {output.bam:q} &>{log.index:q}
-        """
+    wrapper:
+        "0.65.0/bio/bwa-mem2/mem"
 
 def bwa_mem_dataset_collector_input(wildcards):
     return [
