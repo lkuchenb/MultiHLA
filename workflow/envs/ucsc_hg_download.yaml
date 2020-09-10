@@ -18,25 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Global rules including conversion of tool specific output to MultiHLA
-# standard output
-include: 'rules/multihla.smk'
+channels:
+    - bioconda
+    - conda-forge
 
-# UCSC human genome download and alt contig filter
-include: 'rules/ucsc_hg_download.smk'
-
-# Comparison to ground truth alleles
-include: 'rules/compare.smk'
-
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
-
+dependencies:
+    - biopython==1.78
