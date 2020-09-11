@@ -41,34 +41,11 @@ rule bwa_index:
         '0.65.0/bio/bwa-mem2/index'
 
 def bwa_mem_input(wildcards):
-    dataset = wildcards.dataset
-    sample  = wildcards.sample
-    trim    = wildcards.trim == 'trim'
-    ref     = wildcards.ref
-
-    records = [ record for record in helpers.read_sample_sheet(dataset) if record['SampleName'] == sample ]
-
-    fastqs_r1 = [ record['FileNameR1'] for record in records ]
-    fastqs_r2 = [ record['FileNameR2'] for record in records if record['FileNameR2'] != '']
-
-    if len(fastqs_r1) != 1:
-        print(fastqs_r1)
-        raise RuntimeError('Exactly one R1 reads file has to be specified for a sample')
-    if len(fastqs_r2) not in [0,1] :
-        raise RuntimeError('One or no R2 reads file has to be specified for a sample')
-
-    reads = fastqs_r1 + fastqs_r2
-
-    if trim:
-        reads = [ os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for fastq in reads ]
-    else:
-        reads = [ os.path.join('fastq', fastq) for fastq in reads ]
-
     return {
-            'reads' : reads,
-            'ref'   : os.path.join('ref', ref + '.fa'),
-            'pac'   : os.path.join('ref', ref + '.fa.pac'),
-            }
+            'reads' : input_reads(wildcards),
+            'ref'   : os.path.join('ref', wildcards.ref + '.fa'),
+            'pac'   : os.path.join('ref', wildcards.ref + '.fa.pac'),
+        }
 
 rule samtools_index:
     conda:

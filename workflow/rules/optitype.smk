@@ -18,30 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Global rules including conversion of tool specific output to MultiHLA
-# standard output
-include: 'rules/multihla.smk'
-
-# UCSC human genome download and alt contig filter
-include: 'rules/ucsc_hg_download.smk'
-
-# Comparison to ground truth alleles
-include: 'rules/compare.smk'
-
-# Adapter trimming
-include: 'rules/trim.smk'
-
-# Read mapping
-include: 'rules/map.smk'
-
-# Tool: HLA VBSeq
-include: 'rules/hla_vbseq.smk'
-
-# Tool: xHLA
-include: 'rules/xhla.smk'
-
-# Tool: HLA-LA
-include: 'rules/hla_la.smk'
-
-# Tool: OptiType
-include: 'rules/optitype.smk'
+rule optitype:
+    input:
+        unpack(lambda wildcards : { 'reads' : input_reads(wildcards) })
+    output:
+        multiext("typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt", "_coverage_plot.pdf", "_result.tsv")
+    log:
+        "typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt.log"
+    params:
+        # Type of sequencing data. Can be 'dna' or 'rna'. Default is 'dna'.
+        sequencing_type="dna",
+        # optiype config file, optional
+        config="",
+        # additional parameters
+        extra=lambda wildcards : "--prefix " + '_'.join([wildcards.dataset, wildcards.sample, wildcards.trim, 'nofilt'])
+    wrapper:
+        "0.65.0/bio/optitype"

@@ -31,6 +31,14 @@ publicly available software to derive HLA haplotypes from this type of data.
 	* v1 database based on IMGT/HLA database, Release 3.15.0
 	* v2 database based on IMGT/HLA database Release 3.31.0 and Japanese HLA reference dataset
 
+ * OptiType
+
+	*Szolek, A., Schubert, B., Mohr, C., Sturm, M., Feldhahn, M., & Kohlbacher, O. (2014). OptiType: precision HLA typing from next-generation sequencing data. Bioinformatics, 30(23), 3310-3316.*
+
+	The workflow invokes the [OptiType snakemake wrapper][1] without prior filtering
+	of reads.
+
+
 ## Usage
 
  1. Install snakemake
@@ -93,3 +101,5 @@ publicly available software to derive HLA haplotypes from this type of data.
 	```
 	snakemake --latency-wait 20 --drmaa " -V -l h_vmem={params.cluster_mem} -l h_rt={params.cluster_rt} -pe smp {threads} -j yes -o ${PWD}/cluster_log" -j 999 --use-conda --use-singularity
 	```
+
+[1]: https://snakemake-wrappers.readthedocs.io/en/0.61.0/wrappers/optitype.html

@@ -25,6 +25,36 @@ def get_samples(dataset):
     return list({ record['SampleName'] for record in helpers.read_sample_sheet(dataset) })
 
 ####################################################################################################
+# INPUT HELPER FOR RULES THAT WORK ON RAW READS
+####################################################################################################
+
+def input_reads(wildcards):
+    dataset = wildcards.dataset
+    sample  = wildcards.sample
+    trim    = wildcards.trim == 'trim'
+
+    records = [ record for record in helpers.read_sample_sheet(dataset) if record['SampleName'] == sample ]
+
+    fastqs_r1 = [ record['FileNameR1'] for record in records ]
+    fastqs_r2 = [ record['FileNameR2'] for record in records if record['FileNameR2'] != '']
+
+    if len(fastqs_r1) != 1:
+        print(fastqs_r1)
+        raise RuntimeError('Exactly one R1 reads file has to be specified for a sample')
+    if len(fastqs_r2) not in [0,1] :
+        raise RuntimeError('One or no R2 reads file has to be specified for a sample')
+
+    reads = fastqs_r1 + fastqs_r2
+
+    if trim:
+        reads = [ os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for fastq in reads ]
+    else:
+        reads = [ os.path.join('fastq', fastq) for fastq in reads ]
+
+    return reads
+
+
+####################################################################################################
 # XHLA
 ####################################################################################################
 
@@ -176,6 +206,57 @@ rule hla_vbseq_dataset:
         '../scripts/concat_tables.py'
 
 ####################################################################################################
+# OPTITYPE
+####################################################################################################
+
+rule optitype_conversion:
+    """Converts OptiType output files to the MultiHLA standard format"""
+    input:
+        'typing/optitype/{dataset}_{sample}_{trim}_{ref}_result.tsv',
+    output:
+        'typing/optitype/{dataset}_{sample}_{trim}_{ref}.optitype.multihla',
+    params:
+        opts = lambda wildcards : f'version=1.3.4 trim={wildcards.trim} filt={wildcards.ref}',
+        # Parameters for cluster execution
+        cluster_mem = '1G',
+        cluster_rt = '0:15:00',
+    run:
+        import csv
+        from collections import defaultdict
+        ddict = defaultdict(lambda : set())
+        with open(input[0], 'r') as infile:
+            reader = csv.DictReader(infile, delimiter = '\t')
+            for rec in reader:
+                if ddict:
+                    raise RuntimeError('optitype_conversion requires the result file to contain exactly one record')
+                ddict['A'] = { rec['A1'].split('*')[1], rec['A2'].split('*')[1] }
+                ddict['B'] = { rec['B1'].split('*')[1], rec['B2'].split('*')[1] }
+                ddict['C'] = { rec['C1'].split('*')[1], rec['C2'].split('*')[1] }
+        with open(output[0], 'w') as outfile:
+            print('Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2', file = outfile)
+            for gene, alleles in ddict.items():
+                alleles = list(alleles)
+                print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-LA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+
+rule optitype_dataset:
+    input:
+        lambda wildcards : [
+            f'typing/optitype/{wildcards.dataset}_{sample}_{trim}_{filt}.optitype.multihla'
+            for sample in get_samples(wildcards.dataset)
+            for filt in [ 'nofilt' ] # No prior read filtering against hg19 or hg38
+            for trim in [ 'trim' ]  # We only work with adapter trimmed reads
+            ]
+    output:
+        'typing/optitype/{dataset}.optitype.ds.multihla'
+    params:
+        # Parameters for cluster execution
+        cluster_mem = '1G',
+        cluster_rt = '0:15:00',
+    script:
+        '../scripts/concat_tables.py'
+
+
+####################################################################################################
 # GLOBAL COLLECTOR
 ####################################################################################################
 
@@ -184,6 +265,7 @@ rule collect:
         'typing/vbseq/{dataset}.vbseq.ds.multihla',
         'typing/xhla/{dataset}.xhla.ds.multihla',
         'typing/hla_la/{dataset}.hla_la.ds.multihla',
+        'typing/optitype/{dataset}.optitype.ds.multihla',
     output:
         'typing/{dataset}.all.multihla'
     params:
