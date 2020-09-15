@@ -66,10 +66,9 @@ rule xhla_conversion:
         'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.multihla',
     params:
         opts = lambda wildcards : f'version=0 trim={wildcards.trim} ref={wildcards.ref}',
-
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     run:
         # Parse JSON output of xHLA
         import json
@@ -103,10 +102,9 @@ rule hla_xhla_dataset:
             ]
     output:
         'typing/xhla/{dataset}.xhla.ds.multihla'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/concat_tables.py'
 
@@ -122,10 +120,9 @@ rule hla_la_conversion:
         'typing/hla_la/{dataset}_{sample}_{trim}_{ref}.hla_la.multihla',
     params:
         opts = lambda wildcards : f'version=1.0.1 trim={wildcards.trim} ref={wildcards.ref}',
-
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     run:
         import csv
         from collections import defaultdict
@@ -158,10 +155,9 @@ rule hla_la_dataset:
             ]
     output:
         'typing/hla_la/{dataset}.hla_la.ds.multihla'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/concat_tables.py'
 
@@ -177,10 +173,9 @@ rule hla_vbseq_conversion:
         'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.multihla',
     params:
         opts = lambda wildcards : f'version={wildcards.version} trim={wildcards.trim} ref={wildcards.ref}',
-
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     shell:
         r"""
         echo -e 'Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2' >{output:q}
@@ -198,10 +193,9 @@ rule hla_vbseq_dataset:
             ]
     output:
         'typing/vbseq/{dataset}.vbseq.ds.multihla'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/concat_tables.py'
 
@@ -217,9 +211,9 @@ rule optitype_conversion:
         'typing/optitype/{dataset}_{sample}_{trim}_{ref}.optitype.multihla',
     params:
         opts = lambda wildcards : f'version=1.3.4 trim={wildcards.trim} filt={wildcards.ref}',
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     run:
         import csv
         from collections import defaultdict
@@ -248,10 +242,9 @@ rule optitype_dataset:
             ]
     output:
         'typing/optitype/{dataset}.optitype.ds.multihla'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/concat_tables.py'
 
@@ -268,9 +261,8 @@ rule collect:
         'typing/optitype/{dataset}.optitype.ds.multihla',
     output:
         'typing/{dataset}.all.multihla'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/concat_tables.py'

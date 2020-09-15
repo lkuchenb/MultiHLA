@@ -32,5 +32,8 @@ rule optitype:
         config="",
         # additional parameters
         extra=lambda wildcards : "--prefix " + '_'.join([wildcards.dataset, wildcards.sample, wildcards.trim, 'nofilt'])
+    resources:
+        mem_mb = '30G',
+        time   = '1:00:00',
     wrapper:
         "0.65.0/bio/optitype"

@@ -37,6 +37,9 @@ rule bwa_index:
     params:
         prefix='ref/{genome}',
         algorithm='bwtsw'
+    resources:
+        mem_mb = '100G',
+        time   = '1:00:00',
     wrapper:
         '0.65.0/bio/bwa-mem2/index'
 
@@ -54,10 +57,9 @@ rule samtools_index:
         'map/{sample}.bam'
     output:
         'map/{sample}.bam.bai'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '16G',
-        cluster_rt = '1:00:00',
+    resources:
+        mem_mb = '16G',
+        time   = '1:00:00',
     threads:
         1
     shell:
@@ -81,9 +83,9 @@ rule bwa_mem_2:
         sort="samtools",         # Can be 'none', 'samtools' or 'picard'.
         sort_order="coordinate", # Can be 'coordinate' (default) or 'queryname'.
         sort_extra="",           # Extra args for samtools/picard.
-        # Parameters for cluster execution
-        cluster_mem = '16G',
-        cluster_rt = '8:00:00',
+    resources:
+        mem_mb = '16G',
+        time   = '8:00:00',
     threads:
         6
     wrapper:
@@ -100,6 +102,9 @@ rule bwa_mem_dataset_collector:
         bwa_mem_dataset_collector_input
     output:
         'map/{dataset}_{trim}_{ref}.map.all'
+    resources:
+        mem_mb = '1GB',
+        time   = '0:15:00',
     shell:
         """
         touch {output:q}

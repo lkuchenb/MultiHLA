@@ -33,9 +33,9 @@ rule hla_la_graph_compilation:
         'typing/hla_la/hla_la.graphs.log',
     params:
         checksum='525a8aa0c7f357bf29fe2c75ef1d477d',
-        # Parameters for cluster execution
-        cluster_mem = '40G',
-        cluster_rt = '5:00:00',
+    resources:
+        mem_mb = '40G',
+        time   = '5:00:00',
     threads:
         1
     shell:
@@ -68,6 +68,9 @@ rule hla_la_typing:
         outdir = directory('typing/hla_la/{base}.hla_la.out'),
     params:
         tempdir = lambda wildcards : f'typing/hla_la/{wildcards.base}.hla_la.tempdir'
+    resources:
+        mem_mb = '40G',
+        time   = '5:00:00',
     log:
        'typing/hla_la/{base}.hla_la.log',
     shell:
