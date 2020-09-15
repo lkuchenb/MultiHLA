@@ -46,6 +46,19 @@ publicly available software to derive HLA haplotypes from this type of data.
 	The workflow invokes the [OptiType snakemake wrapper][1] without prior filtering
 	of reads.
 
+* HLA-LA
+
+	*Dilthey, A. T., Mentzer, A. J., Carapito, R., Cutland, C., Cereb, N., Madhi, S. A., ... & Phillippy, A. M. (2019). HLA* LA—HLA typing from linearly projected graph alignments. Bioinformatics, 35(21), 4394-4396.*
+
+	The workflow uses reads mapped against the human genome (hg38) without
+	alt contigs as input for HLA-LA. A corresponding reference txt file for HLA-LA
+	is part of this workflow repository. The preprocessed graph directory
+	`PRG_MHC_GRCh38_withIMGT` can be either placed manually in
+	`typing/hla_la/hla_la.graphs/` or it will be downloaded and preprocessed
+	automatically.
+
+	The workflow uses the [HLA-LA bioconda package][3] for graph preprocessing and HLA typing.
+
 
 ## Usage
 
@@ -112,3 +125,4 @@ publicly available software to derive HLA haplotypes from this type of data.
 
 [1]: https://snakemake-wrappers.readthedocs.io/en/0.61.0/wrappers/optitype.html
 [2]: https://hub.docker.com/r/humanlongevity/hla
+[3]: https://bioconda.github.io/recipes/hla-la/README.html
