@@ -13,12 +13,20 @@ publicly available software to derive HLA haplotypes from this type of data.
 
  * xHLA
 
+	*Xie, C., Yeo, Z. X., Wong, M., Piper, J., Long, T., Kirkness, E. F., ... & Brady, C. (2017). Fast and accurate HLA typing from short-read next-generation sequence data with xHLA. Proceedings of the National Academy of Sciences, 114(30), 8059-8064.*
+
 	The workflow implements read mapping the reads against hg38 without alt
 	contigs using `bwa mem` as instructed by the authors. The mapped reads are then
-	sorted and index using samtools and the HLA typing is performed using the
-	docker container provided by the authors.
+	sorted and index using samtools.
+
+	The workflow utilizes the [Docker Image][2] provided by the authors to
+	perform the actual HLA typing.
 
  * HLA-VBSeq
+
+	*Nariai, N., Kojima, K., Saito, S., Mimori, T., Sato, Y., Kawai, Y., ... & Nagasaki, M. (2015, December). HLA-VBSeq: accurate HLA typing at full resolution from whole-genome sequencing data. In BMC genomics (Vol. 16, No. S2, p. S7). BioMed Central.*
+
+	*Wang, Y. Y., Mimori, T., Khor, S. S., Gervais, O., Kawai, Y., Hitomi, Y., ... & Nagasaki, M. (2019). HLA-VBSeq v2: improved HLA calling accuracy with full-length Japanese class-I panel. Human Genome Variation, 6(1), 1-5.*
 
 	The workflow implements read mapping the reads against hg19 without alt
 	contigs. The authors instructions merely state to "map against hg19"
@@ -103,3 +111,4 @@ publicly available software to derive HLA haplotypes from this type of data.
 	```
 
 [1]: https://snakemake-wrappers.readthedocs.io/en/0.61.0/wrappers/optitype.html
+[2]: https://hub.docker.com/r/humanlongevity/hla
