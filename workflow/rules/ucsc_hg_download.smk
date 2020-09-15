@@ -28,5 +28,8 @@ rule ucsc_hg_download:
         HTTP.remote('https://hgdownload.soe.ucsc.edu/goldenPath/hg{version}/bigZips/hg{version}.fa.gz', keep_local = False)
     output:
         'ref/hg{version,19|38}.noalt.fa'
+    resources:
+        mem_mb = '5G',
+        time   = '0:30:00',
     script:
         '../scripts/hg_filter_noalt.py'

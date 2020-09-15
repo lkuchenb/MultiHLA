@@ -32,12 +32,11 @@ rule xhla_typing:
         bindir = temp(directory('typing/xhla/{base}.xhla.bindir')),
     log:
         'typing/xhla/{base}.xhla.log',
-    params:
-        # Parameters for cluster execution
+    resources:
         # Some times xHLA just leaks infinite amounts of memory and will be
         # killed by the OOM killer or grid engine. Oh well...
-        cluster_mem = '200G',
-        cluster_rt = '2:00:00',
+        mem_mb = '200G',
+        time   = '2:00:00',
     threads:
         6
     shell:

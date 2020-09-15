@@ -27,9 +27,8 @@ rule compare:
         gtruth = 'truth/{dataset}.tsv',
     conda:
         '../envs/compare.yaml'
-    params:
-        # Parameters for cluster execution
-        cluster_mem = '1G',
-        cluster_rt = '0:15:00',
+    resources:
+        mem_mb = '1G',
+        time   = '0:15:00',
     script:
         '../scripts/compare.py'

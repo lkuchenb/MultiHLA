@@ -64,11 +64,11 @@ rule hla_vbseq_typing:
 
         hla_vbseq_ref_fa                 = lambda wildcards : check_bin(get_reference(wildcards, 'fasta')),
         hla_vbseq_ref_txt                = lambda wildcards : check_bin(get_reference(wildcards, 'txt')),
-        # Parameters for cluster execution
+    resources:
         # Some times xHLA just leaks infinite amounts of memory and will be
         # killed by the OOM killer or grid engine. Oh well...
-        cluster_mem = '25G',
-        cluster_rt = '6:00:00',
+        mem_mb = '25G',
+        time   = '6:00:00',
     threads:
         6
     shell:

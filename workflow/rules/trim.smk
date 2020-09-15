@@ -30,10 +30,9 @@ rule trim:
         r2_tmp = 'trim/{prefix}_R2{suffix}_val_2.fq.gz',
         r1fastqc_tmp = 'trim/{prefix}_R1{suffix}_val_1_fastqc.html',
         r2fastqc_tmp = 'trim/{prefix}_R2{suffix}_val_2_fastqc.html',
-
-        # Parameters for cluster execution
-        cluster_mem = '2G',
-        cluster_rt = '1:00:00',
+    resources:
+        mem_mb = '2G',
+        time   = '1:00:00',
     output:
         r1 = 'trim/{prefix}_R1{suffix}.trimmed.fastq.gz',
         r2 = 'trim/{prefix}_R2{suffix}.trimmed.fastq.gz',
