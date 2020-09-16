@@ -84,7 +84,7 @@ rule bwa_mem_2:
         sort_order="coordinate", # Can be 'coordinate' (default) or 'queryname'.
         sort_extra="",           # Extra args for samtools/picard.
     resources:
-        mem_mb = '16G',
+        mem_mb = '70G',
         time   = '8:00:00',
     threads:
         6
