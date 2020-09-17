@@ -230,7 +230,7 @@ rule optitype_conversion:
             print('Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2', file = outfile)
             for gene, alleles in ddict.items():
                 alleles = list(alleles)
-                print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-LA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+                print(f'{wildcards.dataset}\t{wildcards.sample}\tOptiType\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
 
 rule optitype_dataset:
     input:
