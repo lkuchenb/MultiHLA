@@ -51,8 +51,6 @@ def bwa_mem_input(wildcards):
         }
 
 rule samtools_index:
-    conda:
-        '../envs/samtools.yaml'
     input:
         'map/{sample}.bam'
     output:
@@ -62,10 +60,8 @@ rule samtools_index:
         time   = '1:00:00',
     threads:
         1
-    shell:
-        """
-        samtools index {input:q} {output:q}
-        """
+    wrapper:
+        "0.65.0/bio/samtools/index"
 
 rule bwa_mem_2:
     input:
