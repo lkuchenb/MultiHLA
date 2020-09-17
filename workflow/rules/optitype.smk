@@ -36,4 +36,4 @@ rule optitype:
         mem_mb = '30G',
         time   = '1:00:00',
     wrapper:
-        "0.65.0/bio/optitype"
+        "master/bio/optitype"

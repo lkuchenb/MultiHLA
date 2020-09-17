@@ -210,7 +210,7 @@ rule optitype_conversion:
     output:
         'typing/optitype/{dataset}_{sample}_{trim}_{ref}.optitype.multihla',
     params:
-        opts = lambda wildcards : f'version=1.3.4 trim={wildcards.trim} filt={wildcards.ref}',
+        opts = lambda wildcards : f'version=1.3.5 trim={wildcards.trim} filt={wildcards.ref}',
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
