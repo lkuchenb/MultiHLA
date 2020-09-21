@@ -118,10 +118,7 @@ publicly available software to derive HLA haplotypes from this type of data.
 	```
 	snakemake --use-conda --use-singularity typing/dataset_1.all.multihla
 	```
-	Memory and run time requirements for each job are noted in their params (`cluster_mem` and `cluster_rt`). For example, to interface with an SGE grid engine using DRMAA you may use
-	```
-	snakemake --latency-wait 20 --drmaa " -V -l h_vmem={params.cluster_mem} -l h_rt={params.cluster_rt} -pe smp {threads} -j yes -o ${PWD}/cluster_log" -j 999 --use-conda --use-singularity
-	```
+	Memory and run time requirements for each job are noted in their resources (`mem_mb` and `time`).
 
 [1]: https://snakemake-wrappers.readthedocs.io/en/0.61.0/wrappers/optitype.html
 [2]: https://hub.docker.com/r/humanlongevity/hla
