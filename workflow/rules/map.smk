@@ -71,7 +71,8 @@ rule bwa_mem_2:
     log:
         bwa = 'map/{dataset}_{sample}_{trim}_{ref}.log',
     wildcard_constraints:
-        trim = 'trim|orig'
+        trim = 'trim|orig',
+        dataset = '[^_]*'
     params:
         # Wrapper parameters
         index=lambda wildcards, input : input.ref,
