@@ -31,13 +31,15 @@ rule trim:
         r1fastqc_tmp = 'trim/{prefix}_R1{suffix}_val_1_fastqc.html',
         r2fastqc_tmp = 'trim/{prefix}_R2{suffix}_val_2_fastqc.html',
     resources:
-        mem_mb = '2G',
+        mem_mb = '8G',
         time   = '1:00:00',
     output:
         r1 = 'trim/{prefix}_R1{suffix}.trimmed.fastq.gz',
         r2 = 'trim/{prefix}_R2{suffix}.trimmed.fastq.gz',
         r1fastqc = 'trim/{prefix}_R1{suffix}.trimmed.fastqc.html',
         r2fastqc = 'trim/{prefix}_R2{suffix}.trimmed.fastqc.html',
+    wildcard_constraints:
+        suffix=".*"
     log:
         'trim/{prefix}{suffix}.trim.log',
     threads:

@@ -22,7 +22,7 @@ rule optitype:
     input:
         unpack(lambda wildcards : { 'reads' : input_reads(wildcards) })
     output:
-        multiext("typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt", "_coverage_plot.pdf", "_result.tsv")
+        multiext("typing/optitype/{dataset,[^_]*}_{sample}_{trim,trim|orig}_nofilt", "_coverage_plot.pdf", "_result.tsv")
     log:
         "typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt.log"
     params:

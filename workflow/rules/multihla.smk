@@ -63,7 +63,7 @@ rule xhla_conversion:
     input:
         'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.json',
     output:
-        'typing/xhla/{dataset}_{sample}_{trim}_{ref}.xhla.multihla',
+        'typing/xhla/{dataset,[^_]*}_{sample}_{trim}_{ref}.xhla.multihla',
     params:
         opts = lambda wildcards : f'version=0 trim={wildcards.trim} ref={wildcards.ref}',
     resources:
@@ -84,13 +84,12 @@ rule xhla_conversion:
                 gene, allele = allele.split('*')
                 data[gene].append(allele)
             for gene, alleles in data.items():
-                if len(alleles) == 1:
-                    s = allele[0] + '\tNA'
-                elif len(alleles) == 2:
-                    s = '\t'.join(alleles)
+                if len(alleles) == 2:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\txHLA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+                elif len(alleles) == 1:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\txHLA\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[0]}', file = outfile)
                 else:
-                    raise RuntimeError(f'More than two alleles reported for gene {gene}.')
-                print(f'{wildcards.dataset}\t{wildcards.sample}\txHLA\t{params["opts"]}\t{gene}\t{s}', file = outfile)
+                    raise RuntimeError(f'xHLA: More than two alleles reported for gene {gene}.')
 
 rule hla_xhla_dataset:
     input:
@@ -101,7 +100,7 @@ rule hla_xhla_dataset:
             for trim in [ 'trim' ]      # We only work with adapter trimmed reads
             ]
     output:
-        'typing/xhla/{dataset}.xhla.ds.multihla'
+        'typing/xhla/{dataset,[^_]*}.xhla.ds.multihla'
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
@@ -117,7 +116,7 @@ rule hla_la_conversion:
     input:
         'typing/hla_la/{dataset}_{sample}_{trim}_{ref}.hla_la.txt',
     output:
-        'typing/hla_la/{dataset}_{sample}_{trim}_{ref}.hla_la.multihla',
+        'typing/hla_la/{dataset,[^_]*}_{sample}_{trim}_{ref}.hla_la.multihla',
     params:
         opts = lambda wildcards : f'version=1.0.1 trim={wildcards.trim} ref={wildcards.ref}',
     resources:
@@ -154,7 +153,7 @@ rule hla_la_dataset:
             for trim in [ 'trim' ]      # We only work with adapter trimmed reads
             ]
     output:
-        'typing/hla_la/{dataset}.hla_la.ds.multihla'
+        'typing/hla_la/{dataset,[^_]*}.hla_la.ds.multihla'
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
@@ -170,17 +169,25 @@ rule hla_vbseq_conversion:
     input:
         'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.tsv',
     output:
-        'typing/vbseq/{dataset}_{sample}_{trim}_{ref}.v{version}.vbseq.multihla',
+        'typing/vbseq/{dataset,[^_]*}_{sample}_{trim}_{ref}.v{version}.vbseq.multihla',
     params:
         opts = lambda wildcards : f'version={wildcards.version} trim={wildcards.trim} ref={wildcards.ref}',
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
-    shell:
-        r"""
-        echo -e 'Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2' >{output:q}
-        sed 's/\t[^*]\+[*]/\t/g' < {input:q} | egrep '^(A|B|C|DP|DQ|DRB)' | sed 's/^/{wildcards.dataset}\t{wildcards.sample}\tHLA-VBSeq\t{params[opts]}\t/' >>{output:q}
-        """
+    run:
+        from csv import DictReader
+        with open(input[0], 'r') as infile:
+            reader = DictReader(infile, delimiter = '\t')
+            with open(output[0], 'w') as outfile:
+                for record in reader:
+                    gene = record["Gene"]
+                    allele_1 = record["Allele1"].split('*')[1]
+                    if record["Allele2"]:
+                        allele_2 = record["Allele2"].split('*')[1]
+                        print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-VBSeq\t{params.opts}\t{gene}\t{allele_1}\t{allele_2}', file = outfile)
+                    else:
+                        print(f'{wildcards.dataset}\t{wildcards.sample}\tHLA-VBSeq\t{params.opts}\t{gene}\t{allele_1}\t{allele_1}', file = outfile)
 
 rule hla_vbseq_dataset:
     input:
@@ -192,7 +199,7 @@ rule hla_vbseq_dataset:
             for ver in ['1', '2']       # We perfom the analysis with VBSeq version 1 and 2
             ]
     output:
-        'typing/vbseq/{dataset}.vbseq.ds.multihla'
+        'typing/vbseq/{dataset,[^_]*}.vbseq.ds.multihla'
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
@@ -208,7 +215,7 @@ rule optitype_conversion:
     input:
         'typing/optitype/{dataset}_{sample}_{trim}_{ref}_result.tsv',
     output:
-        'typing/optitype/{dataset}_{sample}_{trim}_{ref}.optitype.multihla',
+        'typing/optitype/{dataset,[^_]*}_{sample}_{trim}_{ref}.optitype.multihla',
     params:
         opts = lambda wildcards : f'version=1.3.5 trim={wildcards.trim} filt={wildcards.ref}',
     resources:
@@ -230,7 +237,12 @@ rule optitype_conversion:
             print('Dataset\tSample\tMethod\tOptions\tGene\tAllele1\tAllele2', file = outfile)
             for gene, alleles in ddict.items():
                 alleles = list(alleles)
-                print(f'{wildcards.dataset}\t{wildcards.sample}\tOptiType\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+                if len(alleles) == 2:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\tOptiType\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[1]}', file = outfile)
+                elif len(alleles) == 1:
+                    print(f'{wildcards.dataset}\t{wildcards.sample}\tOptiType\t{params.opts}\t{gene}\t{alleles[0]}\t{alleles[0]}', file = outfile)
+                else:
+                    raise RuntimeError('optitype_conversion expects either one or two alleles to be reported per gene')
 
 rule optitype_dataset:
     input:
@@ -241,7 +253,7 @@ rule optitype_dataset:
             for trim in [ 'trim' ]  # We only work with adapter trimmed reads
             ]
     output:
-        'typing/optitype/{dataset}.optitype.ds.multihla'
+        'typing/optitype/{dataset,[^_]*}.optitype.ds.multihla'
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
@@ -260,7 +272,7 @@ rule collect:
         'typing/hla_la/{dataset}.hla_la.ds.multihla',
         'typing/optitype/{dataset}.optitype.ds.multihla',
     output:
-        'typing/{dataset}.all.multihla'
+        'typing/{dataset,[^_]*}.all.multihla'
     resources:
         mem_mb = '1G',
         time   = '0:15:00',
