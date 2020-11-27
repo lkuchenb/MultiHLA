@@ -2,3 +2,4 @@ __pycache__
 .snakemake
 cluster_log
 www.well.ox.ac.uk
+.DS_Store
