@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Leon Kuchenbecker <leon.kuchenbecker@uni-tuebingen.de>
+# Copyright (c) 2022 Leon Kuchenbecker <leon.kuchenbecker@uni-tuebingen.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,22 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-rule optitype:
-    input:
-        unpack(lambda wildcards : { 'reads' : input_reads(wildcards) })
-    output:
-        multiext("typing/optitype/{dataset,[^_]*}_{sample}_{trim,trim|orig}_nofilt", "_coverage_plot.pdf", "_result.tsv")
-    log:
-        "typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt.log"
-    params:
-        # Type of sequencing data. Can be 'dna' or 'rna'. Default is 'dna'.
-        sequencing_type=get_sequence_type,
-        # optiype config file, optional
-        config="",
-        # additional parameters
-        extra=lambda wildcards : "--prefix " + '_'.join([wildcards.dataset, wildcards.sample, wildcards.trim, 'nofilt'])
-    resources:
-        mem_mb = '30G',
-        time   = '1:00:00',
-    wrapper:
-        "0.66.0/bio/optitype"
+channels:
+    - bioconda
+    - conda-forge
+
+dependencies:
+    - biopython==1.71
+    - numpy==1.14.3
+    - pandas==0.23.0
+    - python-dateutil==2.7.3
+    - scipy==1.1.0
+    - bedtools >=2.27.1
+    - kallisto >=0.44.0
+    - pigz
+    - python >=3.6.1
+    - samtools >=1.9
+    - git-lfs
+    - git
+    - tar
+    - coreutils

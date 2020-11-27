@@ -1,8 +1,8 @@
 \documentclass[crop,tikz]{standalone}
 
-\usepackage{libertinus}
-\usepackage{libertinust1math}
 \usepackage[T1]{fontenc}
+\usepackage[sfdefault,scaled=.85]{FiraSans}
+\usepackage{newtxsf}
 \usepackage[scaled=0.79]{beramono}
 
 \usetikzlibrary{positioning}
@@ -21,6 +21,10 @@
         text width=25mm,
         align=center,
         minimum height=10mm,
+        fill=teal!80,
+    },
+    rna/.style={
+        fill=orange!80
     },
     minor/.style={
         main,
@@ -49,25 +53,56 @@
     \draw [-Triangle] (vbseqMap3.south) -- +(0,-.5\vdist) -| (vbseq1);
     \draw [-Triangle] (vbseqMap3.south) -- +(0,-.5\vdist) -| (vbseq2);
 
-    \node [main] (optitype) at ($(hlala)!.5!(vbseq1)$) {OptiType};
+    \node [main] (optitype) at ($(hlala)!.5!(vbseq1)$) {};
+    \path [draw=black, rounded corners, fill=orange!80]
+        ($(optitype.north)+(1mm,-.5\pgflinewidth)$) --
+        ($(optitype.north east)-(0,.5\pgflinewidth)$) --
+        ($(optitype.south east)+(0,.5\pgflinewidth)$) --
+        ($(optitype.south)-(1mm,-.5\pgflinewidth)$);
+    \node [] at (optitype) {OptiType};
 
-    \node [main, anchor=south] (trim) at ($(map38noalt.north west)!.5!(map19noalt.north east) + (0,\vdist)$) {Adapter Trimming};
-    \draw [-Triangle] (trim) -- (optitype);
 
-    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (map19noalt.north);
-    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (map38noalt.north);
-
-    \node [main, below=\vdist of optitype] (compare) {Compare (Evaluate)};
-
-    \draw [-Triangle] (xhla.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
-    \draw (hlala.south) -- +(0,-.5\vdist);
-    \draw (optitype.south) -- +(0,-.5\vdist);
-    \draw (vbseq1.south) -- +(0,-.5\vdist);
-    \draw (vbseq2.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+%    \draw (hlala.south) -- +(0,-.5\vdist);
+%    \draw (optitype.south) -- +(0,-.5\vdist);
+%    \draw (vbseq1.south) -- +(0,-.5\vdist);
 
     \coordinate (ref) at ($(xhla.south)!.5!(hlala.south)$);
-    \node [main, dashed, below=\vdist of ref] (gstandard) {Ground Truth};
+
+    % ARCAS HLA
+    \node [main, rna, right=4mm of vbseq2] (arcashla) {arcasHLA};
+    \node [main, rna] at (map19noalt-|arcashla) (mapstar) {Read Mapping\\ hg38 (no alt)};
+    \node [minor, rna, below=-\pgflinewidth of mapstar] (mapstar1) {STAR};
+    \node [minor, rna, below=-\pgflinewidth of mapstar1] (mapstar2) {samtools sort};
+    \node [minor, rna, below=-\pgflinewidth of mapstar2] (mapstar3) {samtools index};
+    \draw [-Triangle] (mapstar3) -- (arcashla);
+
+    % Adapter Trimming
+    \node [main, anchor=south] (trim) at ($(current bounding box.north) + (0,\vdist)$) {Adapter Trimming};
+
+    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (map19noalt.north);
+    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (optitype.north);
+    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (map38noalt.north);
+    \draw [-Triangle] (trim.south) -- +(0,-.5\vdist) -| (mapstar.north);
+
+    % Compare
+    \node [main, below=\vdist of {current bounding box.south}] (compare) {Compare (Evaluate)};
+    \node [main, dashed, left=8mm of compare] (gstandard) {Ground Truth};
     \draw [dashed, -Triangle] (gstandard) -- (compare);
+
+    \draw [-Triangle] (xhla.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+    \draw (hlala.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+    \draw (optitype.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+    \draw (vbseq1.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+    \draw (vbseq2.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+    \draw (arcashla.south) |- ($(compare.north)+(0,.5\vdist)$) -- (compare.north);
+
+    \node [fill=teal!80, rounded corners, inner sep=0mm, minimum size=5mm, right=10mm of compare]
+        (dnalegend) {};
+    \node [right=0mm of dnalegend] {DNA};
+    \node [fill=orange!80, rounded corners, inner sep=0mm, minimum size=5mm, right=10mm of dnalegend]
+        (rnalegend) {};
+    \node [right=0mm of rnalegend] {RNA};
+
 \end{tikzpicture}
 
 \end{document}
