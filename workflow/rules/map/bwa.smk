@@ -52,9 +52,9 @@ def bwa_mem_input(wildcards):
 
 rule samtools_index:
     input:
-        'map/{sample}.bam'
+        '{sample}.bam'
     output:
-        'map/{sample}.bam.bai'
+        '{sample}.bam.bai'
     resources:
         mem_mb = '16G',
         time   = '1:00:00',

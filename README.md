@@ -48,7 +48,7 @@ publicly available software to derive HLA haplotypes from this type of data.
 
 * HLA-LA
 
-	*Dilthey, A. T., Mentzer, A. J., Carapito, R., Cutland, C., Cereb, N., Madhi, S. A., ... & Phillippy, A. M. (2019). HLA* LA—HLA typing from linearly projected graph alignments. Bioinformatics, 35(21), 4394-4396.*
+	*Dilthey, A. T., Mentzer, A. J., Carapito, R., Cutland, C., Cereb, N., Madhi, S. A., ... & Phillippy, A. M. (2019). HLA\*LA - HLA typing from linearly projected graph alignments. Bioinformatics, 35(21), 4394-4396.*
 
 	The workflow uses reads mapped against the human genome (hg38) without
 	alt contigs as input for HLA-LA. A corresponding reference txt file for HLA-LA
@@ -59,6 +59,13 @@ publicly available software to derive HLA haplotypes from this type of data.
 
 	The workflow uses the [HLA-LA bioconda package][3] for graph preprocessing and HLA typing.
 
+* arcasHLA
+
+	*Orenbuch, R., Filip, I., Comito, D., Shaman, J., Pe’er, I., & Rabadan, R. (2020). arcasHLA: high-resolution HLA typing from RNAseq. Bioinformatics, 36(1), 33-40.*
+
+	The workflow maps RNAseq reads against the human genome (hg38) without
+	alt contigs using the STAR aligner with default paramters. It then
+	invokes the 'extract' and 'genotype' subtools provided by arcasHLA.
 
 ## Usage
 

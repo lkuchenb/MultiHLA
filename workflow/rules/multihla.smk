@@ -28,12 +28,26 @@ def get_samples(dataset):
 # INPUT HELPER FOR RULES THAT WORK ON RAW READS
 ####################################################################################################
 
-def input_reads(wildcards):
+def get_sample_meta(wildcards):
     dataset = wildcards.dataset
     sample  = wildcards.sample
     trim    = wildcards.trim == 'trim'
 
     records = [ record for record in helpers.read_sample_sheet(dataset) if record['SampleName'] == sample ]
+    return dataset, sample, trim, records
+
+def get_sequence_type(wildcards):
+    dataset, sample, trim, records = get_sample_meta(wildcards)
+    seq_types = { record['SeqType'].lower() for record in records }
+    if len(seq_types) != 1:
+        raise RuntimeError(f"Inconsistent sequence type for sample '{sample}' in dataset '{dataset}'")
+    seq_type = seq_types.pop()
+    if seq_type not in ['dna', 'rna']:
+        raise RuntimeError(f"Invalid sequence type: {seq_type}")
+    return seq_type
+
+def input_reads(wildcards):
+    dataset, sample, trim, records = get_sample_meta(wildcards)
 
     fastqs_r1 = [ record['FileNameR1'] for record in records ]
     fastqs_r2 = [ record['FileNameR2'] for record in records if record['FileNameR2'] != '']
@@ -47,7 +61,7 @@ def input_reads(wildcards):
     reads = fastqs_r1 + fastqs_r2
 
     if trim:
-        reads = [ os.path.join('trim', re.sub('fastq.gz$', 'trimmed.fastq.gz', fastq)) for fastq in reads ]
+        reads = [ os.path.join('trim', re.sub('fastq(.gz)?$', 'trimmed.fastq.gz', fastq)) for fastq in reads ]
     else:
         reads = [ os.path.join('fastq', fastq) for fastq in reads ]
 

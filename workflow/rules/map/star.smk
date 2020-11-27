@@ -18,22 +18,52 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-rule optitype:
+import shlex
+import helpers
+import os
+
+def star_input(wildcards):
+    reads = input_reads(wildcards)
+    return {
+            'fq1'     : reads[0],
+            'fq2'     : reads[1],
+            'ref'     : os.path.join('ref', wildcards.ref + '.fa'),
+            'ref_idx' : os.path.join('ref', wildcards.ref + '.star'),
+        }
+
+rule star_index:
     input:
-        unpack(lambda wildcards : { 'reads' : input_reads(wildcards) })
+        fasta = "ref/{base}.fa"
     output:
-        multiext("typing/optitype/{dataset,[^_]*}_{sample}_{trim,trim|orig}_nofilt", "_coverage_plot.pdf", "_result.tsv")
-    log:
-        "typing/optitype/{dataset}_{sample}_{trim,trim|orig}_nofilt.log"
-    params:
-        # Type of sequencing data. Can be 'dna' or 'rna'. Default is 'dna'.
-        sequencing_type=get_sequence_type,
-        # optiype config file, optional
-        config="",
-        # additional parameters
-        extra=lambda wildcards : "--prefix " + '_'.join([wildcards.dataset, wildcards.sample, wildcards.trim, 'nofilt'])
+        directory("ref/{base}.star"),
     resources:
-        mem_mb = '30G',
-        time   = '1:00:00',
+        mem_mb = '40G',
+        time   = '2:00:00',
+    threads:
+        8
+    params:
+        extra = ""
+    log:
+        "ref/{base}.star.log"
     wrapper:
-        "0.66.0/bio/optitype"
+        "0.67.0/bio/star/index"
+
+rule star_map_pe:
+    input:
+        unpack(star_input)
+    output:
+        bam = 'map/star/{dataset}_{sample}_{trim}_{ref}/Aligned.sortedByCoord.out.bam',
+    log:
+        'map/star/{dataset}_{sample}_{trim}_{ref}.log'
+    resources:
+        mem_mb = '40G',
+        time   = '2:00:00',
+    params:
+        # path to STAR reference genome index
+        index=lambda wildcards, input : input.ref_idx,
+        # optional parameters
+        extra="--outSAMtype BAM SortedByCoordinate"
+    threads: 8
+    wrapper:
+        "0.67.0/bio/star/align"
+
